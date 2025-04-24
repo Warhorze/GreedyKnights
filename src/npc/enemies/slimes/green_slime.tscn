@@ -1,0 +1,96 @@
+[gd_scene load_steps=14 format=3 uid="uid://coky7n4ep0ynr"]
+
+[ext_resource type="Texture2D" uid="uid://cssendlxse6tq" path="res://assets/sprites/slime_green.png" id="1_o0tco"]
+[ext_resource type="Script" uid="uid://cygcdpe11drtn" path="res://src/npc/enemies/slimes/green_slime.gd" id="1_vwfmq"]
+[ext_resource type="Script" uid="uid://bu57r0u0g5cu3" path="res://src/state_machine/states/move.gd" id="4_i3rr6"]
+[ext_resource type="Script" uid="uid://dls27r2ed30h2" path="res://src/npc/enemies/slimes/movement.gd" id="4_rb2b7"]
+[ext_resource type="PackedScene" uid="uid://5bk5tsvj6man" path="res://src/state_machine/state_machine.tscn" id="5_iynbd"]
+[ext_resource type="Script" uid="uid://bnr8mnyjp5emt" path="res://src/state_machine/states/idle.gd" id="6_rb2b7"]
+[ext_resource type="Script" uid="uid://c63su62i4ljoe" path="res://src/state_machine/states/jump.gd" id="7_7hb6j"]
+
+[sub_resource type="RectangleShape2D" id="RectangleShape2D_o0tco"]
+size = Vector2(12, 10)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_0p22s"]
+atlas = ExtResource("1_o0tco")
+region = Rect2(0, 24, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_o0tco"]
+atlas = ExtResource("1_o0tco")
+region = Rect2(24, 24, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_53eih"]
+atlas = ExtResource("1_o0tco")
+region = Rect2(48, 24, 24, 24)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lu2db"]
+atlas = ExtResource("1_o0tco")
+region = Rect2(72, 24, 24, 24)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_q1uvn"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_0p22s")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_o0tco")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_53eih")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lu2db")
+}],
+"loop": false,
+"name": &"move",
+"speed": 10.0
+}]
+
+[node name="green_slime" type="CharacterBody2D"]
+collision_layer = 3
+collision_mask = 3
+script = ExtResource("1_vwfmq")
+
+[node name="RayCastRight" type="RayCast2D" parent="."]
+position = Vector2(0, -5)
+target_position = Vector2(8, 0)
+collide_with_areas = true
+
+[node name="RayCastLeft" type="RayCast2D" parent="."]
+position = Vector2(0, -5)
+target_position = Vector2(-8, 0)
+collide_with_areas = true
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="."]
+position = Vector2(0, -5)
+shape = SubResource("RectangleShape2D_o0tco")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -12)
+sprite_frames = SubResource("SpriteFrames_q1uvn")
+animation = &"move"
+
+[node name="Movement" type="Node" parent="."]
+script = ExtResource("4_rb2b7")
+
+[node name="StateMachine" parent="." node_paths=PackedStringArray("starting_state") instance=ExtResource("5_iynbd")]
+starting_state = NodePath("move")
+
+[node name="idle" type="Node" parent="StateMachine" node_paths=PackedStringArray("jump_state", "move_state")]
+script = ExtResource("6_rb2b7")
+jump_state = NodePath("../jump")
+move_state = NodePath("../move")
+animation_name = "idle"
+
+[node name="jump" type="Node" parent="StateMachine" node_paths=PackedStringArray("idle_state", "move_state")]
+script = ExtResource("7_7hb6j")
+idle_state = NodePath("../idle")
+move_state = NodePath("../move")
+animation_name = "move"
+
+[node name="move" type="Node" parent="StateMachine" node_paths=PackedStringArray("idle_state", "jump_state")]
+script = ExtResource("4_i3rr6")
+idle_state = NodePath("../idle")
+jump_state = NodePath("../jump")
+animation_name = "move"
